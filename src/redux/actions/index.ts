@@ -1,10 +1,9 @@
 // Coloque aqui suas actions
+import { UserReducer } from '../../types';
 
-export const USER_DATA = 'USER_DATA';
+export const SUBMIT_USER_DATA = 'SUBMIT_USER_DATA';
 
-export const UserData = (email: string) => ({
-  type: USER_DATA,
-  payload: {
-    email,
-  },
+export const submitUserData = (user: UserReducer) => ({
+  type: SUBMIT_USER_DATA,
+  payload: user,
 });
