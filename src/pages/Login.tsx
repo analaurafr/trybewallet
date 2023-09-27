@@ -1,61 +1,69 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { submitUserData } from '../redux/actions';
+import { login } from '../redux/actions';
 
-function Login() {
-  const [form, setForm] = useState({
+function LoginPage() {
+  const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const { email, password } = form;
+
+  const { email, password } = formData;
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleChange = (
-    { target }: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    { target }: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const { name: targetName, value } = target;
-    setForm({ ...form, [targetName]: value });
+    const { name, value } = target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  // Função para verificar se os dados são válidos
-  const validData = () => {
+  const EmailValid = () => {
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    const emailValid = emailRegex.test(form.email);
-    const passwordValid = form.password.length >= 6;
-    return emailValid && passwordValid;
+    return emailRegex.test(email);
   };
 
-  const isValidData = validData();
+  const PasswordValid = () => {
+    return password.length >= 6;
+  };
+
+  const FormValid = EmailValid() && PasswordValid();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (FormValid) {
+      dispatch(login(formData));
+      navigate('/carteira');
+    }
+  };
 
   return (
-    <form
-      onSubmit={ (e) => {
-        e.preventDefault();
-        dispatch(submitUserData(form));
-        navigate('/carteira');
-      } }
-    >
+    <form onSubmit={ handleSubmit }>
+      <label htmlFor="email">Email:</label>
       <input
         type="email"
+        id="email"
         data-testid="email-input"
         placeholder="Digite seu email"
         name="email"
-        value={ form.email }
+        value={ email }
         onChange={ handleChange }
       />
+      <label htmlFor="password">Senha:</label>
       <input
         type="password"
+        id="password"
         data-testid="password-input"
         placeholder="Digite sua senha"
         name="password"
-        value={ form.password }
+        value={ password }
         onChange={ handleChange }
       />
       <button
         type="submit"
-        disabled={ !isValidData }
+        disabled={ !FormValid }
       >
         Entrar
       </button>
@@ -63,4 +71,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default LoginPage;

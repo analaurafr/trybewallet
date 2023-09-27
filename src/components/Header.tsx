@@ -1,31 +1,48 @@
 import { useSelector } from 'react-redux';
-import { UserReducer } from '../types';
-
-type UserData = {
-  user: UserReducer;
-};
+import { useEffect, useState } from 'react';
+import { Currencies, Expenses, GlobalState } from '../services/types';
 
 function Header() {
-  const data = useSelector((globalState: UserData) => ({
-    ...globalState.user,
-  }));
+  // Obtenha o e-mail do estado global
+  const userEmail = useSelector((state: GlobalState) => state.user.email);
 
-  const { email } = data;
+  // Obtenha as despesas e moedas do estado global
+  const expenses: Expenses[] = useSelector((state: GlobalState) => state.wallet.expenses);
+  const currencies: Currencies = useSelector(
+    (state: GlobalState) => state.wallet.currencies,
+  );
+
+  // Calcule o total das despesas
+  const totalExpenses = (expensesData: Expenses[]) => {
+    const total = expensesData.reduce((acc, { value, currency, exchangeRates }) => {
+      const exchangeRateCurrency = parseFloat(exchangeRates[currency]?.ask || '1');
+      return acc + parseFloat(value) * exchangeRateCurrency;
+    }, 0);
+    return total.toFixed(2);
+  };
+
+  // Estado para armazenar o total das despesas formatado
+  const [totalExpense, setTotalExpense] = useState(totalExpenses(expenses));
+
+  // Atualize o total das despesas quando as despesas mudarem
+  useEffect(() => {
+    const totalConverted = totalExpenses(expenses);
+    setTotalExpense(totalConverted);
+  }, [expenses]);
+
+  // Formate o total para exibição
+  const totalDisplay = `${totalExpense}`;
 
   return (
     <header>
-      {/* Elemento para exibir o email da pessoa usuária */}
-      <div data-testid="email-field">
-        Email:
-        {' '}
-        { email }
-      </div>
+      {/* Exiba o e-mail com o atributo data-testid */}
+      <div data-testid="email-field">{userEmail}</div>
 
-      {/* Elemento para a despesa total (inicialmente 0) */}
-      <div data-testid="total-field">Despesa Total: 0</div>
+      {/* Exiba o total das despesas com o atributo data-testid */}
+      <div data-testid="total-field">{totalDisplay}</div>
 
-      {/* Elemento para mostrar o câmbio (BRL) */}
-      <div data-testid="header-currency-field">Câmbio: BRL</div>
+      {/* Exiba a moeda atual com o atributo data-testid */}
+      <div data-testid="header-currency-field">BRL</div>
     </header>
   );
 }
