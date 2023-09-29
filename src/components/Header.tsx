@@ -13,7 +13,7 @@ function Header() {
   );
 
   // Calcule o total das despesas
-  const totalExpenses = (expensesData: Expenses[]) => {
+  const totalExp = (expensesData: Expenses[]) => {
     const total = expensesData.reduce((acc, { value, currency, exchangeRates }) => {
       const exchangeRateCurrency = parseFloat(exchangeRates[currency]?.ask || '1');
       return acc + parseFloat(value) * exchangeRateCurrency;
@@ -22,11 +22,11 @@ function Header() {
   };
 
   // Estado para armazenar o total das despesas formatado
-  const [totalExpense, setTotalExpense] = useState(totalExpenses(expenses));
+  const [totalExpense, setTotalExpense] = useState(totalExp(expenses));
 
   // Atualize o total das despesas quando as despesas mudarem
   useEffect(() => {
-    const totalConverted = totalExpenses(expenses);
+    const totalConverted = totalExp(expenses);
     setTotalExpense(totalConverted);
   }, [expenses]);
 
